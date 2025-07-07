@@ -74,12 +74,14 @@ def main():
     # Make output directory if it does not exist
     output_pred = f"{args.out_folder}/preds"
     os.makedirs(output_pred, exist_ok=True)
-    
+    os.system(f"rm -rf {output_pred}/*")
+
     video_file = Path(args.video_file)
     if video_file.is_file():
         # If video_file is a file, we assume it is a video file
         args.img_folder = f"{args.out_folder}/extracter"
         os.makedirs(args.img_folder, exist_ok=True)
+        os.system(f"rm -rf {args.img_folder}/*")
         video_path = video_file
         img_paths = []
         cap = cv2.VideoCapture(str(video_path))

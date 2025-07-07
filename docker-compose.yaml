@@ -1,7 +1,7 @@
 services:   
   hamba:
     container_name: hamba
-    image: pytorch/pytorch:2.0.1-cuda11.7-cudnn8-devel
+    image: pytorch/pytorch:2.1.2-cuda11.8-cudnn8-devel
     volumes:
       # - /etc/timezone:/etc/timezone:ro
       # - /etc/localtime:/etc/localtime:ro

@@ -25,8 +25,9 @@ import shutil
 
 def main():
     parser = argparse.ArgumentParser(description='hamba demo code')
+    parser.add_argument('--video_file', type=str, default='./example_data', help='Folder with input video')
     parser.add_argument('--img_folder', type=str, default='./example_data', help='Folder with input images')
-    parser.add_argument('--checkpoint', type=str, default="ckpts/hamba/checkpoints/hamba.ckpt", help='Path to pretrained model checkpoint')
+    parser.add_argument('--checkpoint', type=str, default="downloads/hamba/checkpoints/hamba.ckpt", help='Path to pretrained model checkpoint')
     parser.add_argument('--out_folder', type=str, default='./demo_out/', help='Output folder to save rendered results')
     parser.add_argument('--side_view', dest='side_view', action='store_true', default=False, help='If set, render side view also')
     parser.add_argument('--full_frame', dest='full_frame', action='store_true', default=True, help='If set, render all people together also')
@@ -71,7 +72,27 @@ def main():
     renderer = Renderer(model_cfg, faces=model.mano.faces)
 
     # Make output directory if it does not exist
-    os.makedirs(args.out_folder, exist_ok=True)
+    output_pred = f"{args.out_folder}/preds"
+    os.makedirs(output_pred, exist_ok=True)
+    
+    video_file = Path(args.video_file)
+    if video_file.is_file():
+        # If video_file is a file, we assume it is a video file
+        args.img_folder = f"{args.out_folder}/extracter"
+        os.makedirs(args.img_folder, exist_ok=True)
+        video_path = video_file
+        img_paths = []
+        cap = cv2.VideoCapture(str(video_path))
+        if not cap.isOpened():
+            raise ValueError(f"Could not open video file: {video_path}")
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        for i in range(frame_count):
+            ret, frame = cap.read()
+            if ret:
+                img_path = os.path.join(args.img_folder, f'frame_{i:04d}.jpg')
+                cv2.imwrite(img_path, frame)
+                img_paths.append(img_path)
+        cap.release()
 
     # Get all demo images ends with .jpg or .png
     img_paths = [img for end in args.file_type for img in Path(args.img_folder).glob(end)]
@@ -125,7 +146,7 @@ def main():
 
         if len(bboxes) == 0:
             img_fn, _ = os.path.splitext(os.path.basename(img_path))
-            all_mesh_path = os.path.join(args.out_folder, f'{img_fn}_all.jpg')
+            all_mesh_path = os.path.join(output_pred, f'{img_fn}_all.jpg')
             cv2.imwrite(all_mesh_path, img_cv2)
             continue
 
@@ -134,6 +155,7 @@ def main():
         keypoints_2d_arr = np.stack(keypoints_2d_list)
 
         # Run reconstruction on all detected hands
+        # print(f"model config: {model_cfg}")
         dataset = ViTDetDataset(model_cfg, img_cv2, boxes, right, rescale_factor=args.rescale_factor, keypoints_2d_arr=keypoints_2d_arr)
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
 
@@ -145,7 +167,7 @@ def main():
             if -1 in batch["is_valid"]:
                 print("no hand detection: ", img_path)
                 img_fn, _ = os.path.splitext(os.path.basename(img_path))
-                all_mesh_path = os.path.join(args.out_folder, f'{img_fn}_all.jpg')
+                all_mesh_path = os.path.join(output_pred, f'{img_fn}_all.jpg')
                 cv2.imwrite(all_mesh_path, img_cv2)
                 print("cp src: ", all_mesh_path)
                 continue
@@ -192,7 +214,7 @@ def main():
                 else:
                     final_img = np.concatenate([input_patch, regression_img], axis=1)
 
-                cv2.imwrite(os.path.join(args.out_folder, f'{img_fn}_{person_id}.png'), 255*final_img[:, :, ::-1])
+                # cv2.imwrite(os.path.join(output_pred, f'{img_fn}_{person_id}.png'), 255*final_img[:, :, ::-1])
 
                 # Add all verts and cams to list
                 verts = out['pred_vertices'][n].detach().cpu().numpy()
@@ -207,7 +229,7 @@ def main():
                 if args.save_mesh:
                     camera_translation = cam_t.copy()
                     tmesh = renderer.vertices_to_trimesh(verts, camera_translation, LIGHT_BLUE, is_right=is_right)
-                    tmesh.export(os.path.join(args.out_folder, f'{img_fn}_{person_id}.obj'))
+                    tmesh.export(os.path.join(output_pred, f'{img_fn}_{person_id}.obj'))
 
         # Render front view
         if args.full_frame and len(all_verts) > 0:
@@ -229,9 +251,29 @@ def main():
             input_img_overlay = input_img[:,:,:3] * (1 - valid_mask) + cam_view[:,:,:3] * valid_mask
             final_img = 255*input_img_overlay[:, :, ::-1]
 
-            all_mesh_path = os.path.join(args.out_folder, f'{img_fn}_all.jpg')
+            all_mesh_path = os.path.join(output_pred, f'{img_fn}_all.jpg')
             cv2.imwrite(all_mesh_path, final_img)
             print("all_mesh_path: ", all_mesh_path)
+            
+    # write images output to a video
+    if video_file.is_file():
+        video_out_path = os.path.join(args.out_folder, 'output_video.mp4')
+        img_files = sorted(Path(output_pred).glob('*_all.jpg'))
+        if len(img_files) == 0:
+            print("No images found to create video.")
+            return
+
+        first_img = cv2.imread(str(img_files[0]))
+        height, width, _ = first_img.shape
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        video_writer = cv2.VideoWriter(video_out_path, fourcc, 30.0, (width, height))
+
+        for img_file in img_files:
+            img = cv2.imread(str(img_file))
+            video_writer.write(img)
+
+        video_writer.release()
+        print(f"Video saved to {video_out_path}")
 
 if __name__ == '__main__':
     main()

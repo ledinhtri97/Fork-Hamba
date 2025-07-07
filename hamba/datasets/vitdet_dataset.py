@@ -85,7 +85,7 @@ class ViTDetDataset(torch.utils.data.Dataset):
         if True:
             # Blur image to avoid aliasing artifacts
             downsampling_factor = ((bbox_size*1.0) / patch_width)
-            print(f'{downsampling_factor=}')
+            # print(f'{downsampling_factor=}')
             downsampling_factor = downsampling_factor / 2.0
             if downsampling_factor > 1.1:
                 cvimg  = gaussian(cvimg, sigma=(downsampling_factor-1)/2, channel_axis=2, preserve_range=True)
@@ -95,7 +95,7 @@ class ViTDetDataset(torch.utils.data.Dataset):
         # print("cvimg.shape: ", cvimg.shape)
         # print("output_path: ", output_path)
         
-        print("cvimg.shape: ", cvimg.shape) # cvimg.shape:  (1600, 1182, 3)
+        # print("cvimg.shape: ", cvimg.shape) # cvimg.shape:  (1600, 1182, 3)
         img_patch_cv, trans = generate_image_patch_cv2(cvimg,
                                                     center_x, center_y,
                                                     bbox_size, bbox_size,
@@ -116,7 +116,7 @@ class ViTDetDataset(torch.utils.data.Dataset):
             keypoints_2d = self.keypoints_2d_arr[idx]
             # bbox = self.boxes[idx]
             # curr_bbox_size = max(bbox[2] - bbox[0], bbox[3] - bbox[1])
-            print("keypoints_2d.shape: ", keypoints_2d.shape)
+            # print("keypoints_2d.shape: ", keypoints_2d.shape)
             # print("keypoints_2d: ", keypoints_2d)
             # keypoints_2d[:, 0] -= (center_x - curr_bbox_size/2)
             # keypoints_2d[:, 1] -= (center_y - curr_bbox_size/2)
@@ -139,7 +139,7 @@ class ViTDetDataset(torch.utils.data.Dataset):
             ############################
             ## keypoints_2d from mediapipe start
             results = self.mp_hand.process(img_patch_rgb.astype(np.uint8))
-            print('Handedness:', results.multi_handedness) # left or right
+            # print('Handedness:', results.multi_handedness) # left or right
             hand_landmarks = results.multi_hand_landmarks
             if hand_landmarks is None:
                 item = {

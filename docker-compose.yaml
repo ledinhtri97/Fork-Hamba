@@ -1,0 +1,20 @@
+services:   
+  hamba:
+    container_name: hamba
+    image: pytorch/pytorch:2.0.1-cuda11.7-cudnn8-devel
+    volumes:
+      # - /etc/timezone:/etc/timezone:ro
+      # - /etc/localtime:/etc/localtime:ro
+      - ~/workspace/:/workspace
+    
+    runtime: nvidia
+    restart: unless-stopped
+
+    environment:
+      PYTHONIOENCODING: utf-8
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+
+    stdin_open: true
+    tty: true
+    privileged: true

@@ -31,6 +31,7 @@ if [ ! -d "downloads/hamba" ]; then
   cd downloads/
   gdown https://drive.google.com/uc?id=1JRPC11YfQym8t_EZkhsroglvGHrGPbU-
   unzip hamba.zip
+  cd ..
 fi
 
 if [ ! -d "downloads/mano_v1_2" ]; then

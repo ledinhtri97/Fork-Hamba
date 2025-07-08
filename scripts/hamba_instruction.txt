@@ -1,11 +1,11 @@
 [STEP1] - Initilation 
 
-$ unzip -e Hamba.zip
-$ cd Hamba
+# Upload Hamba.zip to server
 
+$ unzip Hamba.zip
+$ cd Hamba
 $ sh scripts/ai_env_installation.sh
 # after run  sh scripts/ai_env_installation.sh . please logout and login again
-
 
 [STEP2] - Download models and packages
 

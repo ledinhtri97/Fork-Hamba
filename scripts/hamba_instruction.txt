@@ -1,19 +1,30 @@
 [STEP1] - Initilation 
-# Clone the repository https://github.com/ledinhtri97/Hamba.git
 
-$ git clone --recursive https://github.com/ledinhtri97/Hamba.git
-
-# Register username and password from https://mano.is.tue.mpg.de/login.php to access models 
-$ export USERNAME=...
-$ export PASSWORD=...
-
+$ unzip -e Hamba.zip
 $ cd Hamba
+
 $ sh scripts/ai_env_installation.sh
 # after run  sh scripts/ai_env_installation.sh . please logout and login again
 
 
 [STEP2] - Download models and packages
 
+# Download manually file hamer_demo_data.tar.gz to folder Hamba/hamer_demo_data.tar.gz: 
+https://drive.google.com/uc?id=1mv7CUAnm73oKsEEG1xE3xH2C_oqcFSzT
+# Extract data
+$ tar --warning=no-unknown-keyword --exclude=".*" -xvf hamer_demo_data.tar.gz
+
+
+# Download manually hamba.zip to folder Hamba/downloads/hamba.zip
+https://drive.google.com/uc?id=1JRPC11YfQym8t_EZkhsroglvGHrGPbU-
+# Extract data
+$ cd Hamba/downloads/
+$ unzip hamba.zip
+
+
+# Register username and password from https://mano.is.tue.mpg.de/login.php to access models 
+$ export USERNAME=...
+$ export PASSWORD=...
 $ cd Hamba
 $ sh scripts/download_all.sh
 $ docker-compose up -d
@@ -36,4 +47,4 @@ $ cd /workspace/
 $ python demo.py --video_file downloads/data_input/video2.mp4 --out_folder downloads/data_output1 --full_frame
 
 # test video images folder
-$ python demo.py --img_folder downloads/data_input/sample_images1 --out_folder downloads/data_output2/ --full_frame
+$ python demo.py --img_folder example_data/ --out_folder downloads/data_output2/ --full_frame

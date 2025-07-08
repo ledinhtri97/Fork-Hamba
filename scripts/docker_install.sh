@@ -10,7 +10,7 @@ apt-get install -y libglu1-mesa libxi-dev libxmu-dev libglu1-mesa-dev \
 cd /workspace/
 pip install -r scripts/requirements.txt
 pip install -v -e third-party/ViTPose
-pip install --no-deps pyopengl==3.1.4
+pip install --no-deps pyopengl==3.1.4 networkx==3.4.2
 
 pip install https://github.com/Dao-AILab/causal-conv1d/releases/download/v1.5.0/causal_conv1d-1.5.0+cu124torch2.1cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 pip install https://github.com/state-spaces/mamba/releases/download/v2.2.4/mamba_ssm-2.2.4+cu11torch2.1cxx11abiTRUE-cp310-cp310-linux_x86_64.whl
